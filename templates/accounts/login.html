@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% load static %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Aid Bureau - Login</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #2c2c2c;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-wrapper {
+            display: flex;
+            width: 900px;
+            min-height: 550px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        /* Left Panel */
+        .left-panel {
+            background: linear-gradient(135deg, #B8960C, #DAA520, #B8960C);
+            width: 40%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .logo-circle {
+            width: 90px;
+            height: 90px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border: 3px solid rgba(255,255,255,0.4);
+        }
+
+        .logo-circle span {
+            font-size: 36px;
+        }
+
+        .left-panel h1 {
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .left-panel p {
+            color: rgba(255,255,255,0.85);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .divider {
+            width: 50px;
+            height: 3px;
+            background: rgba(255,255,255,0.5);
+            margin: 16px auto;
+            border-radius: 2px;
+        }
+
+        .left-panel .tagline {
+            color: rgba(255,255,255,0.7);
+            font-size: 12px;
+            font-style: italic;
+            margin-top: 20px;
+        }
+
+        /* Right Panel */
+        .right-panel {
+            background: #f5f5f5;
+            width: 60%;
+            padding: 50px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .right-panel h2 {
+            color: #2c2c2c;
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .right-panel .subtitle {
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            background: white;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            border-color: #DAA520;
+            box-shadow: 0 0 0 3px rgba(218,165,32,0.15);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #B8960C, #DAA520);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .btn-login:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        .error-msg {
+            background: #ffe0e0;
+            border: 1px solid #ffaaaa;
+            color: #cc0000;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .footer-text {
+            text-align: center;
+            color: #aaa;
+            font-size: 12px;
+            margin-top: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-wrapper">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <div class="logo-circle">
+                <img src="{% static 'logo.jpg' %}" 
+                alt="Legal Aid Bureau Logo" 
+                style="width:80px; height:80px; 
+                border-radius:50%; object-fit:cover;">
+            </div>
+            <h1>Legal Aid Bureau</h1>
+            <div class="divider"></div>
+            <p>Leave Management System</p>
+            <p class="tagline">"Access to Justice for All"</p>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <h2>Welcome Back</h2>
+            <p class="subtitle">Sign in to your account to continue</p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="error-msg">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Role</label>
+                    <select name="role" required>
+                        <option value="">-- Select your role --</option>
+                        <option value="it_admin">IT Administrator</option>
+                        <option value="employee">Employee</option>
+                        <option value="hr">Human Resource</option>
+                        <option value="approver">Approver (AD / Director)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div style="position:relative;">
+                        <input type="password" name="password" id="passwordField"
+                        placeholder="Enter your password" required
+                        style="width:100%; padding:11px 40px 11px 14px; border:1.5px solid #ddd;
+                        border-radius:8px; font-size:14px; outline:none;">
+                        <span onclick="togglePassword()" id="eyeIcon"
+                        style="position:absolute; right:12px; top:50%;
+                        transform:translateY(-50%); cursor:pointer; font-size:18px;">👁️</span>
+                    </div>
+                </div>
+                <button type="submit" class="btn-login">Sign In</button>
+            </form>
+
+            <p class="footer-text">
+                Forgot your password? Contact the IT Administrator.
+            </p>
+        </div>
+    </div>
+<script>
+function togglePassword() {
+    const field = document.getElementById('passwordField');
+    const icon = document.getElementById('eyeIcon');
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.textContent = '🙈';
+    } else {
+        field.type = 'password';
+        icon.textContent = '👁️';
+    }
+}
+</script>
+
+</body>
+</html>

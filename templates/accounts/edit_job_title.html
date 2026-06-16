@@ -1,0 +1,40 @@
+{% extends 'includes/base_admin.html' %}
+
+{% block title %}Edit Job Title - TikaPume{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>💼 Edit Job Title</h2>
+    <a href="{% url 'manage_job_titles' %}" class="btn-gold">← Back to Job Titles</a>
+</div>
+
+<div class="form-card" style="max-width:500px;">
+    <h2>Edit Job Title Details</h2>
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label>Job Title</label>
+            <input type="text" name="name"
+            value="{{ job_title.name }}" required>
+        </div>
+        <div class="form-group">
+            <label>Department</label>
+            <select name="department">
+                <option value="">-- Select Department --</option>
+                {% for dept in departments %}
+                    <option value="{{ dept.id }}"
+                    {% if job_title.department.id == dept.id %}
+                    selected{% endif %}>
+                        {{ dept.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn-gold"
+        style="width:100%; padding:12px; font-size:15px;">
+            ✅ Update Job Title
+        </button>
+    </form>
+</div>
+{% endblock %}

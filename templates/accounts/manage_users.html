@@ -1,0 +1,86 @@
+{% extends 'includes/base_admin.html' %}
+
+{% block title %}Manage Users - TikaPume{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>👥 Manage Users</h2>
+    <a href="{% url 'create_user' %}" class="btn-gold">+ Create New User</a>
+</div>
+
+<div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Full Name</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>System Role</th>
+                <th>Job Title</th>
+                <th>Department</th>
+                <th>Grade</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:35px; height:35px;
+                        border-radius:50%; background:linear-gradient(135deg,
+                        #B8960C, #DAA520); display:flex; align-items:center;
+                        justify-content:center; color:white; font-size:14px;
+                        font-weight:600; flex-shrink:0;">
+                            {{ user.first_name|first|upper }}
+                        </div>
+                        <div>
+                            <div style="font-weight:500; color:#2c2c2c;">
+                                {{ user.get_full_name }}
+                            </div>
+                            <div style="font-size:11px; color:#888;">
+                                {{ user.phone|default:"No phone" }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    <span class="badge badge-{{ user.role }}">
+                        {{ user.get_role_display }}
+                    </span>
+                </td>
+                <td>{{ user.job_title.name|default:"—" }}</td>
+                <td>{{ user.department.name|default:"—" }}</td>
+                <td>{{ user.grade.name|default:"—" }}</td>
+                <td>
+                    <div style="display:flex; gap:6px;">
+                        <a href="{% url 'edit_user' user.id %}"
+                        class="btn-gold"
+                        style="padding:5px 12px; font-size:12px;">
+                            ✏️ Edit
+                        </a>
+                        <a href="{% url 'reset_password' user.id %}"
+                        style="padding:5px 12px; font-size:12px;
+                        background:#2c2c2c; color:white; border-radius:8px;
+                        text-decoration:none;">
+                            🔑 Password
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" style="text-align:center;
+                color:#888; padding:30px;">
+                    No users found. Create the first user!
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

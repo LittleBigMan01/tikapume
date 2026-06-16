@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Applications - TikaPume</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f0f0; }
+
+        .navbar {
+            background: linear-gradient(135deg, #B8960C, #DAA520);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .navbar h1 { color: white; font-size: 20px; }
+        .navbar a { color: white; text-decoration: none; margin-left: 20px; font-size: 14px; }
+        .navbar a:hover { text-decoration: underline; }
+
+        .container { padding: 30px; }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #B8960C;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .back-link:hover { text-decoration: underline; }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .page-header h2 { color: #2c2c2c; font-size: 22px; }
+
+        .btn-gold {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #B8960C, #DAA520);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-gold:hover { opacity: 0.9; }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        thead {
+            background: linear-gradient(135deg, #B8960C, #DAA520);
+            color: white;
+        }
+
+        thead th {
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        tbody tr { border-bottom: 1px solid #f0f0f0; }
+        tbody tr:hover { background: #fafafa; }
+
+        tbody td {
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-forwarded_to_hr { background: #cce5ff; color: #004085; }
+        .badge-forwarded_to_approver { background: #d1ecf1; color: #0c5460; }
+        .badge-approved { background: #d4edda; color: #155724; }
+        .badge-declined { background: #f8d7da; color: #721c24; }
+
+        .comment-text {
+            font-size: 12px;
+            color: #888;
+            font-style: italic;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>⚖️ TikaPume — Leave Management System</h1>
+        <div>
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <a href="{% url 'dashboard' %}" class="back-link">← Back to Dashboard</a>
+
+        <div class="page-header">
+            <h2>📂 My Leave Applications</h2>
+            <a href="{% url 'apply_leave' %}" class="btn-gold">+ Apply for Leave</a>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Leave Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Days</th>
+                        <th>Status</th>
+                        <th>Comments</th>
+                        <th>Applied On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ app.leave_type.name }}</td>
+                        <td>{{ app.start_date|date:"d M Y" }}</td>
+                        <td>{{ app.end_date|date:"d M Y" }}</td>
+                        <td>{{ app.total_days }} days</td>
+                        <td>
+                            <span class="badge badge-{{ app.status }}">
+                                {{ app.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if app.hr_comment %}
+                                <div class="comment-text">HR: {{ app.hr_comment }}</div>
+                            {% endif %}
+                            {% if app.approver_comment %}
+                                <div class="comment-text">
+                                    Approver: {{ app.approver_comment }}
+                                </div>
+                            {% endif %}
+                            {% if not app.hr_comment and not app.approver_comment %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>{{ app.applied_at|date:"d M Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align:center;
+                        color:#888; padding:30px;">
+                            No leave applications yet.
+                            <a href="{% url 'apply_leave' %}"
+                            style="color:#B8960C;">Apply now!</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,137 @@
+{% extends 'includes/base_admin.html' %}
+
+{% block title %}Review Leave Request - TikaPume{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>👀 Review Leave Request</h2>
+    <a href="{% url 'supervisor_pending_requests' %}" class="btn-gold">
+        ← Back to Pending
+    </a>
+</div>
+
+<div style="display:grid; grid-template-columns:2fr 1fr; gap:25px;">
+    <div class="form-card">
+        <h2>Leave Application Details</h2>
+
+        <div style="background:#fffbea; border:1px solid #DAA520;
+        border-radius:8px; padding:15px; margin-bottom:20px;">
+            <div style="display:grid;
+            grid-template-columns:1fr 1fr; gap:10px;">
+                <div>
+                    <div style="font-size:12px; color:#888;">Employee</div>
+                    <div style="font-weight:600; color:#2c2c2c;">
+                        {{ application.applicant.get_full_name }}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:#888;">Job Title</div>
+                    <div style="font-weight:600; color:#2c2c2c;">
+                        {{ application.applicant.job_title.name|default:"—" }}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:#888;">Department</div>
+                    <div style="font-weight:600; color:#2c2c2c;">
+                        {{ application.applicant.department.name|default:"—" }}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:#888;">Grade</div>
+                    <div style="font-weight:600; color:#2c2c2c;">
+                        {{ application.applicant.grade.name|default:"—" }}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:#888;">Leave Type</div>
+                    <div style="font-weight:600; color:#2c2c2c;">
+                        {{ application.leave_type.name }}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:#888;">Total Days</div>
+                    <div style="font-weight:600; color:#B8960C;">
+                        {{ application.total_days }} days
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:#888;">Start Date</div>
+                    <div style="font-weight:600; color:#2c2c2c;">
+                        {{ application.start_date|date:"d M Y" }}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:#888;">End Date</div>
+                    <div style="font-weight:600; color:#2c2c2c;">
+                        {{ application.end_date|date:"d M Y" }}
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="font-size:12px; color:#888;">Reason</div>
+                <div style="font-size:14px; color:#555; margin-top:4px;">
+                    {{ application.reason }}
+                </div>
+            </div>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Your Comment (Optional)</label>
+                <textarea name="supervisor_comment"
+                placeholder="Add a comment..."
+                style="min-height:100px;"></textarea>
+            </div>
+
+            <div style="display:grid;
+            grid-template-columns:1fr 1fr; gap:16px; margin-top:10px;">
+                <button type="submit" name="action" value="approve"
+                style="padding:12px; background:#28a745; color:white;
+                border:none; border-radius:8px; font-size:15px;
+                font-weight:600; cursor:pointer;">
+                    ✅ Approve & Forward to HR
+                </button>
+                <button type="submit" name="action" value="decline"
+                style="padding:12px; background:#dc3545; color:white;
+                border:none; border-radius:8px; font-size:15px;
+                font-weight:600; cursor:pointer;"
+                onclick="return confirm('Are you sure you want to decline?')">
+                    ❌ Decline
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Employee Balance -->
+    <div class="form-card">
+        <h2>📊 Leave Balance</h2>
+        {% for balance in application.applicant.leave_balances.all %}
+        <div style="display:flex; justify-content:space-between;
+        padding:10px 0; border-bottom:1px solid #f0f0f0; font-size:13px;">
+            <span style="color:#555;">{{ balance.leave_type.name }}</span>
+            <span style="font-weight:600;
+            color:{% if balance.remaining_days <= 5 %}#dc3545
+            {% else %}#28a745{% endif %};">
+                {{ balance.remaining_days }} days
+            </span>
+        </div>
+        {% empty %}
+        <p style="color:#888; font-size:13px;">No balances found.</p>
+        {% endfor %}
+
+        <div style="margin-top:20px; padding:12px;
+        background:#fffbea; border:1px solid #DAA520;
+        border-radius:8px;">
+            <div style="font-size:12px; color:#888;">Requesting</div>
+            <div style="font-size:18px; font-weight:700;
+            color:#B8960C; margin-top:4px;">
+                {{ application.total_days }} days
+            </div>
+            <div style="font-size:12px; color:#888; margin-top:2px;">
+                {{ application.leave_type.name }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

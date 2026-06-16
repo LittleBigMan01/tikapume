@@ -1,0 +1,76 @@
+{% extends 'includes/base_admin.html' %}
+
+{% block title %}Pending Requests - TikaPume{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>📬 Pending Leave Requests</h2>
+</div>
+
+<div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Employee</th>
+                <th>Department</th>
+                <th>Leave Type</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Days</th>
+                <th>Chosen Approver</th>
+                <th>Reason</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                    <div style="font-weight:500; color:#2c2c2c;">
+                        {{ app.applicant.get_full_name }}
+                    </div>
+                    <div style="font-size:11px; color:#888;">
+                        {{ app.applicant.job_title.name|default:"—" }}
+                    </div>
+                </td>
+                <td>{{ app.applicant.department.name|default:"—" }}</td>
+                <td>{{ app.leave_type.name }}</td>
+                <td>{{ app.start_date|date:"d M Y" }}</td>
+                <td>{{ app.end_date|date:"d M Y" }}</td>
+                <td>{{ app.total_days }} days</td>
+                <td>
+                    {% if app.chosen_approver %}
+                        <span style="color:#B8960C; font-weight:500;">
+                            {{ app.chosen_approver.get_full_name }}
+                        </span>
+                    {% else %}
+                        <span style="color:#dc3545;">Not selected</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span style="font-size:12px; color:#555;">
+                        {{ app.reason|truncatechars:40 }}
+                    </span>
+                </td>
+                <td>
+                    <a href="{% url 'hr_forward_to_approver' app.id %}"
+                    class="btn-gold"
+                    style="padding:5px 12px; font-size:12px;">
+                        📤 Forward
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" style="text-align:center;
+                color:#888; padding:30px;">
+                    No pending leave requests at the moment.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

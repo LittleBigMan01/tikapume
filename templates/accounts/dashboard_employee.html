@@ -1,0 +1,227 @@
+{% extends 'includes/base_admin.html' %}
+
+{% block title %}Employee Dashboard - TikaPume{% endblock %}
+
+{% block content %}
+<!-- Welcome Bar -->
+<div style="background:white; padding:20px 25px; border-radius:10px;
+margin-bottom:25px; border-left:5px solid #DAA520;
+box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+    <h2 style="color:#2c2c2c; font-size:20px;">
+        Welcome, {{ request.user.get_full_name }}! 👋
+    </h2>
+    <p style="color:#888; font-size:13px; margin-top:4px;">
+        Employee Dashboard — Apply for leave and track your applications.
+    </p>
+</div>
+
+<!-- Stats -->
+<div style="display:grid;
+grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+gap:20px; margin-bottom:30px;">
+    <div style="background:white; padding:20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #DAA520;">
+        <div style="font-size:32px; font-weight:700; color:#B8960C;">
+            {{ leave_balances|length }}
+        </div>
+        <div style="font-size:12px; color:#888; margin-top:4px;">
+            Leave Types Assigned
+        </div>
+    </div>
+    <div style="background:white; padding:20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #2c2c2c;">
+        <div style="font-size:32px; font-weight:700; color:#2c2c2c;">
+            {{ request.user.leave_applications.count }}
+        </div>
+        <div style="font-size:12px; color:#888; margin-top:4px;">
+            Total Applications
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<p style="color:#2c2c2c; font-size:16px; font-weight:600;
+margin-bottom:15px; padding-bottom:8px;
+border-bottom:2px solid #DAA520;">
+    ⚡ Quick Actions
+</p>
+
+<div style="display:grid;
+grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+gap:20px; margin-bottom:30px;">
+    <a href="{% url 'apply_leave' %}"
+    style="background:white; padding:25px 20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #DAA520; text-decoration:none; display:block;"
+    onmouseover="this.style.transform='translateY(-3px)'"
+    onmouseout="this.style.transform='translateY(0)'">
+        <div style="font-size:32px; margin-bottom:10px;">📝</div>
+        <h3 style="color:#2c2c2c; font-size:15px; margin-bottom:5px;">
+            Apply for Leave
+        </h3>
+        <p style="color:#888; font-size:12px;">
+            Submit a new leave application
+        </p>
+    </a>
+
+    <a href="{% url 'my_applications' %}"
+    style="background:white; padding:25px 20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #DAA520; text-decoration:none; display:block;"
+    onmouseover="this.style.transform='translateY(-3px)'"
+    onmouseout="this.style.transform='translateY(0)'">
+        <div style="font-size:32px; margin-bottom:10px;">📂</div>
+        <h3 style="color:#2c2c2c; font-size:15px; margin-bottom:5px;">
+            My Applications
+        </h3>
+        <p style="color:#888; font-size:12px;">
+            Track your leave requests
+        </p>
+    </a>
+
+    <a href="{% url 'notifications_list' %}"
+    style="background:white; padding:25px 20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #DAA520; text-decoration:none; display:block;"
+    onmouseover="this.style.transform='translateY(-3px)'"
+    onmouseout="this.style.transform='translateY(0)'">
+        <div style="font-size:32px; margin-bottom:10px;">🔔</div>
+        <h3 style="color:#2c2c2c; font-size:15px; margin-bottom:5px;">
+            Notifications
+        </h3>
+        <p style="color:#888; font-size:12px;">
+            View your notifications
+        </p>
+    </a>
+</div>
+
+<!-- 👇 SUPERVISOR SECTION ADDED HERE -->
+{% if request.user.is_supervisor %}
+<p style="color:#2c2c2c; font-size:16px; font-weight:600;
+margin-bottom:15px; padding-bottom:8px;
+border-bottom:2px solid #DAA520;">
+    👥 Team Leave Requests
+</p>
+
+<div style="display:grid;
+grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+gap:20px; margin-bottom:30px;">
+    <a href="{% url 'supervisor_pending_requests' %}"
+    style="background:white; padding:25px 20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #DAA520; text-decoration:none; display:block;"
+    onmouseover="this.style.transform='translateY(-3px)'"
+    onmouseout="this.style.transform='translateY(0)'">
+        <div style="font-size:32px; margin-bottom:10px;">👀</div>
+        <h3 style="color:#2c2c2c; font-size:15px; margin-bottom:5px;">
+            Team Requests
+            {% if supervisor_requests %}
+            <span style="background:#dc3545; color:white;
+            border-radius:50%; padding:2px 7px;
+            font-size:11px; margin-left:5px;">
+                {{ supervisor_requests|length }}
+            </span>
+            {% endif %}
+        </h3>
+        <p style="color:#888; font-size:12px;">
+            Review your team's leave requests
+        </p>
+    </a>
+</div>
+
+{% if supervisor_requests %}
+<p style="color:#2c2c2c; font-size:16px; font-weight:600;
+margin-bottom:15px; padding-bottom:8px;
+border-bottom:2px solid #DAA520;">
+    ⏳ Pending Team Requests
+</p>
+
+<div class="table-wrapper" style="margin-bottom:30px;">
+    <table>
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Leave Type</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Days</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in supervisor_requests %}
+            <tr>
+                <td>{{ app.applicant.get_full_name }}</td>
+                <td>{{ app.leave_type.name }}</td>
+                <td>{{ app.start_date|date:"d M Y" }}</td>
+                <td>{{ app.end_date|date:"d M Y" }}</td>
+                <td>
+                    <span style="font-weight:600; color:#B8960C;">
+                        {{ app.total_days }} days
+                    </span>
+                </td>
+                <td>
+                    <a href="{% url 'supervisor_action' app.id %}"
+                    class="btn-gold"
+                    style="padding:5px 12px; font-size:12px;">
+                        👁️ Review
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endif %}
+<!-- 👆 END SUPERVISOR SECTION -->
+
+<!-- Leave Balances -->
+<p style="color:#2c2c2c; font-size:16px; font-weight:600;
+margin-bottom:15px; padding-bottom:8px;
+border-bottom:2px solid #DAA520;">
+    📊 My Leave Balances
+</p>
+
+<div style="display:grid;
+grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+gap:20px; margin-bottom:30px;">
+    {% for balance in leave_balances %}
+    <div style="background:white; padding:20px; border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid {% if balance.remaining_days <= 5 %}#dc3545{% else %}#28a745{% endif %};">
+        <div style="font-size:14px; font-weight:500;
+        color:#2c2c2c; margin-bottom:10px;">
+            {{ balance.leave_type.name }}
+        </div>
+        <div style="font-size:28px; font-weight:700;
+        color:{% if balance.remaining_days <= 5 %}#dc3545{% else %}#28a745{% endif %};">
+            {{ balance.remaining_days }}
+        </div>
+        <div style="font-size:12px; color:#888;">days remaining</div>
+        <div style="margin-top:10px; background:#f0f0f0;
+        border-radius:20px; height:6px; overflow:hidden;">
+            <div style="background:{% if balance.remaining_days <= 5 %}#dc3545{% else %}#28a745{% endif %};
+            height:100%; border-radius:20px;
+            width:{% widthratio balance.remaining_days balance.total_days 100 %}%;">
+            </div>
+        </div>
+        <div style="display:flex; justify-content:space-between;
+        font-size:11px; color:#888; margin-top:5px;">
+            <span>Used: {{ balance.used_days }}</span>
+            <span>Total: {{ balance.total_days }}</span>
+        </div>
+    </div>
+    {% empty %}
+    <div style="background:white; padding:25px; border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06); text-align:center;
+    color:#888; font-size:13px;">
+        No leave balances assigned yet.
+        Contact IT Administrator.
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

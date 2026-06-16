@@ -1,0 +1,30 @@
+{% extends 'includes/base_admin.html' %}
+
+{% block title %}Edit Department - TikaPume{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>🏢 Edit Department</h2>
+    <a href="{% url 'manage_departments' %}" class="btn-gold">← Back to Departments</a>
+</div>
+
+<div class="form-card" style="max-width:500px;">
+    <h2>Edit Department Details</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Department Name</label>
+            <input type="text" name="name"
+            value="{{ department.name }}" required>
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <textarea name="description">{{ department.description }}</textarea>
+        </div>
+        <button type="submit" class="btn-gold"
+        style="width:100%; padding:12px; font-size:15px;">
+            ✅ Update Department
+        </button>
+    </form>
+</div>
+{% endblock %}

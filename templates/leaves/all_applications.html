@@ -1,0 +1,108 @@
+{% extends 'includes/base_admin.html' %}
+
+{% block title %}All Applications - TikaPume{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>📂 All Leave Applications</h2>
+</div>
+
+<div style="display:grid;
+grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+gap:15px; margin-bottom:25px;">
+    <div style="background:white; padding:20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #DAA520;">
+        <div style="font-size:28px; font-weight:700; color:#B8960C;">
+            {{ applications.count }}
+        </div>
+        <div style="font-size:12px; color:#888; margin-top:4px;">
+            Total Applications
+        </div>
+    </div>
+    <div style="background:white; padding:20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #856404;">
+        <div style="font-size:28px; font-weight:700; color:#856404;">
+            {{ pending_count }}
+        </div>
+        <div style="font-size:12px; color:#888; margin-top:4px;">
+            Pending
+        </div>
+    </div>
+    <div style="background:white; padding:20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #0c5460;">
+        <div style="font-size:28px; font-weight:700; color:#0c5460;">
+            {{ forwarded_count }}
+        </div>
+        <div style="font-size:12px; color:#888; margin-top:4px;">
+            Forwarded
+        </div>
+    </div>
+    <div style="background:white; padding:20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #28a745;">
+        <div style="font-size:28px; font-weight:700; color:#28a745;">
+            {{ approved_count }}
+        </div>
+        <div style="font-size:12px; color:#888; margin-top:4px;">
+            Approved
+        </div>
+    </div>
+    <div style="background:white; padding:20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #dc3545;">
+        <div style="font-size:28px; font-weight:700; color:#dc3545;">
+            {{ declined_count }}
+        </div>
+        <div style="font-size:12px; color:#888; margin-top:4px;">
+            Declined
+        </div>
+    </div>
+</div>
+
+<div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Employee</th>
+                <th>Department</th>
+                <th>Leave Type</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Days</th>
+                <th>Status</th>
+                <th>Applied On</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ app.applicant.get_full_name }}</td>
+                <td>{{ app.applicant.department.name|default:"—" }}</td>
+                <td>{{ app.leave_type.name }}</td>
+                <td>{{ app.start_date|date:"d M Y" }}</td>
+                <td>{{ app.end_date|date:"d M Y" }}</td>
+                <td>{{ app.total_days }}</td>
+                <td>
+                    <span class="badge badge-{{ app.status }}">
+                        {{ app.get_status_display }}
+                    </span>
+                </td>
+                <td>{{ app.applied_at|date:"d M Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" style="text-align:center;
+                color:#888; padding:30px;">
+                    No leave applications found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

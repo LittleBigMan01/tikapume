@@ -1,0 +1,142 @@
+{% extends 'includes/base_admin.html' %}
+
+{% block title %}HR Dashboard - TikaPume{% endblock %}
+
+{% block content %}
+<!-- Welcome Bar -->
+<div style="background:white; padding:20px 25px; border-radius:10px;
+margin-bottom:25px; border-left:5px solid #DAA520;
+box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+    <h2 style="color:#2c2c2c; font-size:20px;">
+        Welcome, {{ request.user.get_full_name }}! 👋
+    </h2>
+    <p style="color:#888; font-size:13px; margin-top:4px;">
+        HR Dashboard — Review leave requests and forward to approvers.
+    </p>
+</div>
+
+<!-- Stats -->
+<div style="display:grid;
+grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+gap:20px; margin-bottom:30px;">
+    <div style="background:white; padding:20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #DAA520;">
+        <div style="font-size:32px; font-weight:700; color:#B8960C;">
+            {{ pending_count }}
+        </div>
+        <div style="font-size:12px; color:#888; margin-top:4px;">
+            Pending Requests
+        </div>
+    </div>
+    <div style="background:white; padding:20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #28a745;">
+        <div style="font-size:32px; font-weight:700; color:#28a745;">
+            {{ recent_applications|length }}
+        </div>
+        <div style="font-size:12px; color:#888; margin-top:4px;">
+            Total Applications
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<p style="color:#2c2c2c; font-size:16px; font-weight:600;
+margin-bottom:15px; padding-bottom:8px;
+border-bottom:2px solid #DAA520;">
+    ⚡ Quick Actions
+</p>
+
+<div style="display:grid;
+grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+gap:20px; margin-bottom:30px;">
+    <a href="{% url 'hr_pending_requests' %}"
+    style="background:white; padding:25px 20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #DAA520; text-decoration:none; display:block;"
+    onmouseover="this.style.transform='translateY(-3px)'"
+    onmouseout="this.style.transform='translateY(0)'">
+        <div style="font-size:32px; margin-bottom:10px;">📬</div>
+        <h3 style="color:#2c2c2c; font-size:15px; margin-bottom:5px;">
+            Pending Requests
+        </h3>
+        <p style="color:#888; font-size:12px;">
+            Review and forward to approvers
+        </p>
+    </a>
+    <a href="{% url 'all_applications' %}"
+    style="background:white; padding:25px 20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #DAA520; text-decoration:none; display:block;"
+    onmouseover="this.style.transform='translateY(-3px)'"
+    onmouseout="this.style.transform='translateY(0)'">
+        <div style="font-size:32px; margin-bottom:10px;">📂</div>
+        <h3 style="color:#2c2c2c; font-size:15px; margin-bottom:5px;">
+            All Applications
+        </h3>
+        <p style="color:#888; font-size:12px;">
+            View all leave requests
+        </p>
+    </a>
+    <a href="#"
+    style="background:white; padding:25px 20px; border-radius:10px;
+    text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-top:4px solid #DAA520; text-decoration:none; display:block;"
+    onmouseover="this.style.transform='translateY(-3px)'"
+    onmouseout="this.style.transform='translateY(0)'">
+        <div style="font-size:32px; margin-bottom:10px;">🔔</div>
+        <h3 style="color:#2c2c2c; font-size:15px; margin-bottom:5px;">
+            Notifications
+        </h3>
+        <p style="color:#888; font-size:12px;">
+            View your notifications
+        </p>
+    </a>
+</div>
+
+<!-- Recent Applications -->
+<p style="color:#2c2c2c; font-size:16px; font-weight:600;
+margin-bottom:15px; padding-bottom:8px;
+border-bottom:2px solid #DAA520;">
+    📋 Recent Leave Requests
+</p>
+
+<div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Leave Type</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Days</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in recent_applications %}
+            <tr>
+                <td>{{ app.applicant.get_full_name }}</td>
+                <td>{{ app.leave_type.name }}</td>
+                <td>{{ app.start_date|date:"d M Y" }}</td>
+                <td>{{ app.end_date|date:"d M Y" }}</td>
+                <td>{{ app.total_days }}</td>
+                <td>
+                    <span class="badge badge-{{ app.status }}">
+                        {{ app.get_status_display }}
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align:center;
+                color:#888; padding:30px;">
+                    No leave requests yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

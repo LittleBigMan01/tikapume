@@ -1,0 +1,120 @@
+{% extends 'includes/base_admin.html' %}
+
+{% block title %}Notifications - TikaPume{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>🔔 Notifications</h2>
+    <a href="{% url 'dashboard' %}" class="btn-gold">← Back to Dashboard</a>
+</div>
+
+<div style="max-width:800px;">
+    {% for notification in notifications %}
+    <div style="background:white; border-radius:10px;
+    padding:20px 25px; margin-bottom:15px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-left:5px solid
+    {% if notification.notification_type == 'leave_approved' %}#28a745
+    {% elif notification.notification_type == 'leave_declined' %}#dc3545
+    {% elif notification.notification_type == 'leave_forwarded' %}#DAA520
+    {% else %}#2c2c2c{% endif %};
+    {% if not notification.is_read %}
+    background: #fffdf0;{% endif %}">
+
+        <div style="display:flex; justify-content:space-between;
+        align-items:flex-start;">
+            <div style="display:flex; gap:12px; align-items:flex-start;">
+                <div style="font-size:24px;">
+                    {% if notification.notification_type == 'leave_approved' %}
+                        ✅
+                    {% elif notification.notification_type == 'leave_declined' %}
+                        ❌
+                    {% elif notification.notification_type == 'leave_forwarded' %}
+                        📤
+                    {% else %}
+                        🔔
+                    {% endif %}
+                </div>
+                <div>
+                    <div style="font-weight:600; color:#2c2c2c;
+                    font-size:15px; margin-bottom:5px;">
+                        {{ notification.get_notification_type_display }}
+                    </div>
+                    <div style="font-size:14px; color:#555;
+                    line-height:1.6;">
+                        {{ notification.message }}
+                    </div>
+                    <div style="font-size:12px; color:#888;
+                    margin-top:8px;">
+                        From: {{ notification.sender.get_full_name }}
+                        · {{ notification.created_at|date:"d M Y, H:i" }}
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex; flex-direction:column;
+            align-items:flex-end; gap:8px;">
+                {% if not notification.is_read %}
+                <span style="background:#DAA520; color:white;
+                padding:3px 10px; border-radius:20px;
+                font-size:11px; font-weight:600;">
+                    NEW
+                </span>
+                {% endif %}
+                <a href="{% url 'mark_read' notification.id %}"
+                style="font-size:12px; color:#B8960C;
+                text-decoration:none;">
+                    Mark as read
+                </a>
+            </div>
+        </div>
+
+        <!-- Leave Details -->
+        <div style="margin-top:12px; padding:10px 15px;
+        background:#f9f9f9; border-radius:8px;
+        display:flex; gap:20px; flex-wrap:wrap;">
+            <div style="font-size:12px;">
+                <span style="color:#888;">Employee: </span>
+                <span style="color:#2c2c2c; font-weight:500;">
+                    {{ notification.leave_application.applicant.get_full_name }}
+                </span>
+            </div>
+            <div style="font-size:12px;">
+                <span style="color:#888;">Leave Type: </span>
+                <span style="color:#2c2c2c; font-weight:500;">
+                    {{ notification.leave_application.leave_type.name }}
+                </span>
+            </div>
+            <div style="font-size:12px;">
+                <span style="color:#888;">Dates: </span>
+                <span style="color:#2c2c2c; font-weight:500;">
+                    {{ notification.leave_application.start_date|date:"d M Y" }}
+                    to
+                    {{ notification.leave_application.end_date|date:"d M Y" }}
+                </span>
+            </div>
+            <div style="font-size:12px;">
+                <span style="color:#888;">Days: </span>
+                <span style="color:#B8960C; font-weight:600;">
+                    {{ notification.leave_application.total_days }} days
+                </span>
+            </div>
+            <div style="font-size:12px;">
+                <span style="color:#888;">Status: </span>
+                <span class="badge badge-{{ notification.leave_application.status }}">
+                    {{ notification.leave_application.get_status_display }}
+                </span>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div style="background:white; border-radius:10px;
+    padding:40px; text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <div style="font-size:48px; margin-bottom:15px;">🔔</div>
+        <div style="font-size:16px; color:#888;">
+            No notifications yet.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

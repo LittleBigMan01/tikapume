@@ -1,0 +1,147 @@
+{% extends 'includes/base_admin.html' %}
+
+{% block title %}Forward Leave Request - TikaPume{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>📤 Forward Leave Request</h2>
+    <a href="{% url 'hr_pending_requests' %}" class="btn-gold">
+        ← Back to Pending
+    </a>
+</div>
+
+<div style="display:grid; grid-template-columns:2fr 1fr; gap:25px;">
+    <!-- Forward Form -->
+    <div class="form-card">
+        <h2>Review & Forward to Approver</h2>
+
+        <div style="background:#fffbea; border:1px solid #DAA520;
+        border-radius:8px; padding:15px; margin-bottom:20px;">
+            <div style="display:grid;
+            grid-template-columns:1fr 1fr; gap:10px;">
+                <div>
+                    <div style="font-size:12px; color:#888;">Employee</div>
+                    <div style="font-weight:600; color:#2c2c2c;">
+                        {{ application.applicant.get_full_name }}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:#888;">Department</div>
+                    <div style="font-weight:600; color:#2c2c2c;">
+                        {{ application.applicant.department.name|default:"—" }}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:#888;">Leave Type</div>
+                    <div style="font-weight:600; color:#2c2c2c;">
+                        {{ application.leave_type.name }}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:#888;">Total Days</div>
+                    <div style="font-weight:600; color:#B8960C;">
+                        {{ application.total_days }} days
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:#888;">Start Date</div>
+                    <div style="font-weight:600; color:#2c2c2c;">
+                        {{ application.start_date|date:"d M Y" }}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:12px; color:#888;">End Date</div>
+                    <div style="font-weight:600; color:#2c2c2c;">
+                        {{ application.end_date|date:"d M Y" }}
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top:10px;">
+                <div style="font-size:12px; color:#888;">Reason</div>
+                <div style="font-size:14px; color:#555; margin-top:4px;">
+                    {{ application.reason }}
+                </div>
+            </div>
+        </div>
+
+        <div style="background:#e8f4fd; border:1px solid #bee5eb;
+        border-radius:8px; padding:12px; margin-bottom:20px;">
+            <div style="font-size:12px; color:#0c5460;">
+                Forwarding to Approver
+            </div>
+            <div style="font-weight:600; color:#0c5460; margin-top:4px;">
+                {% if application.chosen_approver %}
+                    {{ application.chosen_approver.get_full_name }}
+                    ({{ application.chosen_approver.job_title.name|default:"Approver" }})
+                {% else %}
+                    <span style="color:#dc3545;">
+                        No approver selected by employee
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Select Final Approver (Director/AD)</label>
+                <select name="chosen_approver" required> 
+                    <option value="">-- Select Approver --</option>
+                    {% for approver in approvers %}
+                        <option value="{{ approver.id }}">
+                            {{approver.get_full_name}}
+                            {% if approver.job_title %}
+                                ({{approver.job_title.name}})
+                            {% endif %}
+                        </option>
+                    {% endfor %}
+                </select>>
+                
+            </div>
+
+            <div class="form-group">
+                <label>HR Comment (optional)</label>
+                <textarea name="hr_comment"
+                placeholder="Add a comment for the approver..."
+                style="min-height:100px;"></textarea>               
+            </div>
+            
+            <button type="submit" class="btn-gold"
+            style="width:100%; padding:12px; font-size:15px;">
+                🚀 Forward to Approver
+            </button>
+        </form>
+    </div>
+
+
+    <!-- Employee Leave Balance -->
+    <div class="form-card">
+        <h2>📊 Employee Balance</h2>
+        <div style="margin-bottom:15px;">
+            <div style="font-size:13px; color:#888;">Employee</div>
+            <div style="font-weight:600; color:#2c2c2c;">
+                {{ application.applicant.get_full_name }}
+            </div>
+            <div style="font-size:12px; color:#888; margin-top:2px;">
+                {{ application.applicant.grade.name|default:"—" }}
+            </div>
+        </div>
+
+        {% for balance in application.applicant.leave_balances.all %}
+        <div style="display:flex; justify-content:space-between;
+        align-items:center; padding:10px 0;
+        border-bottom:1px solid #f0f0f0; font-size:13px;">
+            <span style="color:#555;">{{ balance.leave_type.name }}</span>
+            <span style="font-weight:600;
+            color:{% if balance.remaining_days <= 5 %}
+            #dc3545{% else %}#28a745{% endif %};">
+                {{ balance.remaining_days }} days
+            </span>
+        </div>
+        {% empty %}
+        <p style="color:#888; font-size:13px;">No balances found.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+databases:
+  - name: legalaid-db
+    databaseName: legalaid_db
+    user: legalaid_user
+    plan: free
+
+services:
+  - type: web
+    name: tikapume
+    plan: free
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn legalaid.wsgi:application"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        value: tikapume.onrender.com
+      - key: DATABASE_URL
+        fromDatabase:
+          name: legalaid-db
+          property: connectionString
+      - key: EMAIL_HOST_USER
+        value: your_email@outlook.com
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
