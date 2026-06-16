@@ -7,14 +7,21 @@ class Command(createsuperuser.Command):
     def handle(self, *args, **options):
         options.setdefault('interactive', False)
         username = options.get('username') or 'AdminMpha'
-        email = options.get('email') or 'admin@legalaid.mw'
+        email = options.get('email') or 'mkamkuza@legalaidbureau.org'
         password = options.get('password') or 'Mpha@0019'
 
         from django.contrib.auth import get_user_model
         User = get_user_model()
 
         if not User.objects.filter(username=username).exists():
-            User.objects.create_superuser(username=username, email=email, password=password)
-            self.stdout.write(f'Superuser "{username}" created successfully.')
+            user = User.objects.create_superuser(username=username, email=email, password=password)
+            user.role = 'it_admin'
+            user.is_first_login = False
+            user.save()
+            self.stdout.write(f'Superuser "{username}" created successfully with role it_admin.')
         else:
-            self.stdout.write(f'Superuser "{username}" already exists.')
+            user = User.objects.get(username=username)
+            user.role = 'it_admin'
+            user.is_first_login = False
+            user.save()
+            self.stdout.write(f'Superuser "{username}" already exists. Role updated to it_admin.')
