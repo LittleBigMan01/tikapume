@@ -90,7 +90,7 @@
         </a>
         {% endif %}
 
-        {% if active_role == 'employee' %}
+        {% if active_role == 'employee' or active_role == 'it_admin' %}
         <div class="menu-section">MY LEAVE</div>
         <a href="{% url 'apply_leave' %}" class="menu-item
         {% if request.resolver_match.url_name == 'apply_leave' %}active{% endif %}">

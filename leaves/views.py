@@ -108,8 +108,8 @@ def manage_balances(request):
 
     employees = CustomUser.objects.filter(
         Q(role='employee') | Q(secondary_role='employee') |
-        Q(role='hr') | Q(role='approver')
-    ).exclude(role='it_admin').order_by('first_name')
+        Q(role='hr') | Q(role='approver') | Q(role='it_admin')
+    ).order_by('first_name')
     leave_types = LeaveType.objects.all()
     balances = LeaveBalance.objects.all().order_by('user', 'leave_type')
 
@@ -149,7 +149,7 @@ def manage_balances(request):
 @login_required
 def apply_leave(request):
     active_role = request.session.get('active_role', request.user.role)
-    if active_role != 'employee':
+    if active_role not in ['employee', 'it_admin']:
         return redirect('dashboard')
 
     leave_types = LeaveType.objects.all()
@@ -248,7 +248,7 @@ def apply_leave(request):
 @login_required
 def my_applications(request):
     active_role = request.session.get('active_role', request.user.role)
-    if active_role != 'employee':
+    if active_role not in ['employee', 'it_admin']:
         return redirect('dashboard')
 
     applications = LeaveApplication.objects.filter(
@@ -358,7 +358,7 @@ def hr_forward_to_approver(request, application_id):
 @login_required
 def supervisor_pending_requests(request):
     active_role = request.session.get('active_role', request.user.role)
-    if active_role != 'employee' or not request.user.is_supervisor:
+    if active_role not in ['employee', 'it_admin'] or not request.user.is_supervisor:
         return redirect('dashboard')
     pending = LeaveApplication.objects.filter(
         status='pending',
@@ -373,7 +373,7 @@ def supervisor_pending_requests(request):
 @login_required
 def supervisor_action(request, application_id):
     active_role = request.session.get('active_role', request.user.role)
-    if active_role != 'employee' or not request.user.is_supervisor:
+    if active_role not in ['employee', 'it_admin'] or not request.user.is_supervisor:
         return redirect('dashboard')
 
     application = get_object_or_404(LeaveApplication, id=application_id)
