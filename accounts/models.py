@@ -3,7 +3,7 @@ from django.db import models
 
 
 class Department(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -12,7 +12,7 @@ class Department(models.Model):
 
 
 class Grade(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -21,7 +21,7 @@ class Grade(models.Model):
 
 
 class JobTitle(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     department = models.ForeignKey(
         Department, on_delete=models.SET_NULL,
         null=True, blank=True

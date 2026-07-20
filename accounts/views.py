@@ -238,9 +238,12 @@ def manage_departments(request):
         name = request.POST.get('name')
         description = request.POST.get('description')
         if name:
-            Department.objects.create(name=name, description=description)
-            messages.success(request, f'Department "{name}" created successfully!')
-            return redirect('manage_departments')
+            if Department.objects.filter(name__iexact=name.strip()).exists():
+                messages.error(request, f'A department named "{name}" already exists.')
+            else:
+                Department.objects.create(name=name.strip(), description=description)
+                messages.success(request, f'Department "{name}" created successfully!')
+                return redirect('manage_departments')
 
     return render(request, 'accounts/manage_departments.html', {
         'departments': departments,
@@ -259,11 +262,14 @@ def edit_department(request, dept_id):
         name = request.POST.get('name')
         description = request.POST.get('description')
         if name:
-            department.name = name
-            department.description = description
-            department.save()
-            messages.success(request, f'Department "{name}" updated successfully!')
-            return redirect('manage_departments')
+            if Department.objects.filter(name__iexact=name.strip()).exclude(id=department.id).exists():
+                messages.error(request, f'A department named "{name}" already exists.')
+            else:
+                department.name = name.strip()
+                department.description = description
+                department.save()
+                messages.success(request, f'Department "{name}" updated successfully!')
+                return redirect('manage_departments')
 
     return render(request, 'accounts/edit_department.html', {
         'department': department,
@@ -293,9 +299,12 @@ def manage_grades(request):
         name = request.POST.get('name')
         description = request.POST.get('description')
         if name:
-            Grade.objects.create(name=name, description=description)
-            messages.success(request, f'Grade "{name}" created successfully!')
-            return redirect('manage_grades')
+            if Grade.objects.filter(name__iexact=name.strip()).exists():
+                messages.error(request, f'A grade named "{name}" already exists.')
+            else:
+                Grade.objects.create(name=name.strip(), description=description)
+                messages.success(request, f'Grade "{name}" created successfully!')
+                return redirect('manage_grades')
 
     return render(request, 'accounts/manage_grades.html', {
         'grades': grades,
@@ -314,11 +323,14 @@ def edit_grade(request, grade_id):
         name = request.POST.get('name')
         description = request.POST.get('description')
         if name:
-            grade.name = name
-            grade.description = description
-            grade.save()
-            messages.success(request, f'Grade "{name}" updated successfully!')
-            return redirect('manage_grades')
+            if Grade.objects.filter(name__iexact=name.strip()).exclude(id=grade.id).exists():
+                messages.error(request, f'A grade named "{name}" already exists.')
+            else:
+                grade.name = name.strip()
+                grade.description = description
+                grade.save()
+                messages.success(request, f'Grade "{name}" updated successfully!')
+                return redirect('manage_grades')
 
     return render(request, 'accounts/edit_grade.html', {
         'grade': grade,
@@ -349,12 +361,15 @@ def manage_job_titles(request):
         name = request.POST.get('name')
         department_id = request.POST.get('department')
         if name:
-            job_title = JobTitle(name=name)
-            if department_id:
-                job_title.department = Department.objects.get(id=department_id)
-            job_title.save()
-            messages.success(request, f'Job Title "{name}" created successfully!')
-            return redirect('manage_job_titles')
+            if JobTitle.objects.filter(name__iexact=name.strip()).exists():
+                messages.error(request, f'A job title named "{name}" already exists.')
+            else:
+                job_title = JobTitle(name=name.strip())
+                if department_id:
+                    job_title.department = Department.objects.get(id=department_id)
+                job_title.save()
+                messages.success(request, f'Job Title "{name}" created successfully!')
+                return redirect('manage_job_titles')
 
     return render(request, 'accounts/manage_job_titles.html', {
         'job_titles': job_titles,
@@ -375,11 +390,14 @@ def edit_job_title(request, job_title_id):
         name = request.POST.get('name')
         department_id = request.POST.get('department')
         if name:
-            job_title.name = name
-            job_title.department = Department.objects.get(id=department_id) if department_id else None
-            job_title.save()
-            messages.success(request, f'Job Title "{name}" updated successfully!')
-            return redirect('manage_job_titles')
+            if JobTitle.objects.filter(name__iexact=name.strip()).exclude(id=job_title.id).exists():
+                messages.error(request, f'A job title named "{name}" already exists.')
+            else:
+                job_title.name = name.strip()
+                job_title.department = Department.objects.get(id=department_id) if department_id else None
+                job_title.save()
+                messages.success(request, f'Job Title "{name}" updated successfully!')
+                return redirect('manage_job_titles')
 
     return render(request, 'accounts/edit_job_title.html', {
         'job_title': job_title,

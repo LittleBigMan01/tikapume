@@ -25,12 +25,15 @@ def manage_leave_types(request):
             name = request.POST.get('name')
             description = request.POST.get('description')
             if name:
-                LeaveType.objects.create(
-                    name=name,
-                    description=description,
-                )
-                messages.success(request, f'Leave type "{name}" created successfully!')
-                return redirect('manage_leave_types')
+                if LeaveType.objects.filter(name__iexact=name.strip()).exists():
+                    messages.error(request, f'A leave type named "{name}" already exists.')
+                else:
+                    LeaveType.objects.create(
+                        name=name.strip(),
+                        description=description,
+                    )
+                    messages.success(request, f'Leave type "{name}" created successfully!')
+                    return redirect('manage_leave_types')
 
         elif action == 'set_grade_days':
             leave_type_id = request.POST.get('leave_type')

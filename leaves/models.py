@@ -3,7 +3,7 @@ from accounts.models import CustomUser, Grade
 
 
 class LeaveType(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -39,6 +39,9 @@ class LeaveBalance(models.Model):
     total_days = models.IntegerField(default=0)
     used_days = models.IntegerField(default=0)
     year = models.IntegerField()
+
+    class Meta:
+        unique_together = ['user', 'leave_type', 'year']
 
     @property
     def remaining_days(self):
