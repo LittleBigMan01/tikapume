@@ -113,6 +113,23 @@
         .topbar h1 { color: white; font-size: 18px; }
         .topbar .user-info { color: rgba(255,255,255,0.9); font-size: 14px; }
 
+        .topbar-logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            background: rgba(0,0,0,0.15);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .topbar-logout-btn:hover { background: rgba(0,0,0,0.3); }
+
         .content-area { padding: 30px; }
 
         /* Common styles */
@@ -296,10 +313,16 @@
     <div class="main-content" id="mainContent">
         <div class="topbar">
             <h1>⚖️ TikaPume — Leave Management System</h1>
-            <span class="user-info">
-                👤 {{ request.user.get_full_name }} 
-                ({{ request.user.get_role_display }})
-            </span>
+            <div style="display:flex; align-items:center; gap:16px;">
+                <span class="user-info">
+                    👤 {{ request.user.get_full_name }}
+                    ({{ request.user.get_role_display }})
+                </span>
+                <a href="{% url 'logout' %}" class="topbar-logout-btn"
+                onclick="return confirm('Are you sure you want to log out?')">
+                    🚪 Logout
+                </a>
+            </div>
         </div>
 
         <div class="content-area">
