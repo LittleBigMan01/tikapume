@@ -23,7 +23,7 @@
             holidays are not counted as leave days.
         </div>
 
-        <form method="POST">
+        <form method="POST" id="apply_leave_form" onsubmit="return validateSupervisorSelected()">
             {% csrf_token %}
             <div class="form-group">
                 <label>Leave Type</label>
@@ -65,19 +65,45 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="position:relative;">
                 <label>Choose Supervisor</label>
-                <select name="chosen_supervisor" required>
-                    <option value="">-- Select Your Supervisor --</option>
+                <input type="text" id="supervisor_search"
+                autocomplete="off"
+                placeholder="🔍 Type to search for your supervisor..."
+                onkeyup="filterSupervisors()"
+                onfocus="document.getElementById('supervisor_dropdown').style.display='block'">
+                <input type="hidden" name="chosen_supervisor"
+                id="chosen_supervisor_id">
+
+                <div id="supervisor_dropdown" style="display:none;
+                position:absolute; z-index:10; top:68px; left:0; right:0;
+                background:white; border:1px solid #ddd; border-radius:8px;
+                max-height:220px; overflow-y:auto;
+                box-shadow:0 4px 12px rgba(0,0,0,0.1);">
                     {% for supervisor in supervisors %}
-                        <option value="{{ supervisor.id }}">
-                            {{ supervisor.get_full_name }}
-                            {% if supervisor.job_title %}
+                    <div class="supervisor-option"
+                    data-name="{{ supervisor.get_full_name|lower }}"
+                    data-id="{{ supervisor.id }}"
+                    onclick="selectSupervisor('{{ supervisor.id }}', '{{ supervisor.get_full_name }}{% if supervisor.job_title %} ({{ supervisor.job_title.name }}){% endif %}')"
+                    style="padding:10px 14px; cursor:pointer;
+                    font-size:14px; border-bottom:1px solid #f0f0f0;">
+                        {{ supervisor.get_full_name }}
+                        {% if supervisor.job_title %}
+                            <span style="color:#888; font-size:12px;">
                                 ({{ supervisor.job_title.name }})
-                            {% endif %}
-                        </option>
+                            </span>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div style="padding:10px 14px; color:#888; font-size:13px;">
+                        No supervisors available.
+                    </div>
                     {% endfor %}
-                </select>
+                    <div id="no_supervisor_match" style="display:none;
+                    padding:10px 14px; color:#888; font-size:13px;">
+                        No matches found.
+                    </div>
+                </div>
             </div>
 
             <div class="form-group">
@@ -125,4 +151,56 @@
         </div>
     </div>
 </div>
+
+<style>
+.supervisor-option:hover {
+    background: #fffbea;
+}
+</style>
+
+<script>
+function filterSupervisors() {
+    const query = document.getElementById('supervisor_search').value.toLowerCase();
+    const options = document.querySelectorAll('.supervisor-option');
+    let anyVisible = false;
+
+    options.forEach(function (opt) {
+        const matches = opt.dataset.name.includes(query);
+        opt.style.display = matches ? 'block' : 'none';
+        if (matches) anyVisible = true;
+    });
+
+    document.getElementById('no_supervisor_match').style.display =
+        (anyVisible || options.length === 0) ? 'none' : 'block';
+    document.getElementById('supervisor_dropdown').style.display = 'block';
+
+    // Clear the selected id if the visible text no longer matches a real selection
+    document.getElementById('chosen_supervisor_id').value = '';
+}
+
+function selectSupervisor(id, name) {
+    document.getElementById('chosen_supervisor_id').value = id;
+    document.getElementById('supervisor_search').value = name;
+    document.getElementById('supervisor_dropdown').style.display = 'none';
+}
+
+function validateSupervisorSelected() {
+    if (!document.getElementById('chosen_supervisor_id').value) {
+        alert('Please search for and select your supervisor from the list.');
+        document.getElementById('supervisor_search').focus();
+        return false;
+    }
+    return true;
+}
+
+// Close dropdown when clicking outside of it
+document.addEventListener('click', function (event) {
+    const wrapper = document.getElementById('supervisor_search');
+    const dropdown = document.getElementById('supervisor_dropdown');
+    if (wrapper && dropdown &&
+        !wrapper.contains(event.target) && !dropdown.contains(event.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+</script>
 {% endblock %}
