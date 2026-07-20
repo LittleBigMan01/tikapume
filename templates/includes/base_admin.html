@@ -292,6 +292,62 @@
         .badge-forwarded_to_approver { background: #d1ecf1; color: #0c5460; }
         .badge-approved { background: #d4edda; color: #155724; }
         .badge-declined { background: #f8d7da; color: #721c24; }
+
+        /* Tables scroll horizontally instead of squashing on narrow screens */
+        .table-wrapper { overflow-x: auto; }
+        .table-wrapper table { min-width: 640px; }
+
+        /* Sidebar overlay backdrop, used only on mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 999;
+        }
+        .sidebar-overlay.visible { display: block; }
+
+        /* ===== Mobile responsive rules ===== */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 250px;
+            }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .sidebar.collapsed { width: 250px; }
+
+            .main-content { margin-left: 0; }
+            .main-content.expanded { margin-left: 0; }
+
+            .topbar {
+                padding: 12px 15px;
+                flex-wrap: wrap;
+                row-gap: 8px;
+            }
+            .topbar h1 { font-size: 15px; }
+            .topbar .user-info { font-size: 12px; }
+            .topbar-logout-btn { font-size: 12px; padding: 6px 10px; }
+
+            .content-area { padding: 15px; }
+
+            .form-card { padding: 16px; }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .page-header h2 { font-size: 19px; }
+
+            /* Stack any inline two/three-column grid layouts used
+               throughout the templates (grid-template-columns) */
+            div[style*="grid-template-columns"] {
+                display: block !important;
+            }
+            div[style*="grid-template-columns"] > * {
+                margin-bottom: 16px;
+            }
+        }
     </style>
     <style>
 .notif-badge {
@@ -309,6 +365,7 @@
     {% with active_role=request.session.active_role %}
     {% include 'includes/sidebar.html' %}
     {% endwith %}
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
 
     <div class="main-content" id="mainContent">
         <div class="topbar">
@@ -340,9 +397,28 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const main = document.getElementById('mainContent');
-            sidebar.classList.toggle('collapsed');
-            main.classList.toggle('expanded');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('visible');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                main.classList.toggle('expanded');
+            }
         }
+
+        function closeMobileSidebar() {
+            document.getElementById('sidebar').classList.remove('mobile-open');
+            document.getElementById('sidebarOverlay').classList.remove('visible');
+        }
+
+        // Close the mobile sidebar automatically after navigating
+        document.querySelectorAll('.menu-item').forEach(function (link) {
+            link.addEventListener('click', function () {
+                if (window.innerWidth <= 768) closeMobileSidebar();
+            });
+        });
     </script>
 
     {% block extra_js %}{% endblock %}
