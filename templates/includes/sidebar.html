@@ -1,5 +1,4 @@
-Here's the updated file with that replacement made:
-django{% load static %}
+{% load static %}
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <img src="{% static 'logo.jpg' %}" alt="Logo"
@@ -73,6 +72,11 @@ django{% load static %}
             <span class="menu-icon">📅</span>
             <span class="menu-text">Leave Balances</span>
         </a>
+        <a href="{% url 'manage_public_holidays' %}" class="menu-item
+        {% if request.resolver_match.url_name == 'manage_public_holidays' %}active{% endif %}">
+            <span class="menu-icon">🎉</span>
+            <span class="menu-text">Public Holidays</span>
+        </a>
         <a href="{% url 'all_applications' %}" class="menu-item
         {% if request.resolver_match.url_name == 'all_applications' %}active{% endif %}">
             <span class="menu-icon">📂</span>
@@ -124,7 +128,7 @@ django{% load static %}
 
         {% if active_role == 'approver' %}
         <div class="menu-section">APPROVALS</div>
-        <a href=""{% url 'supervisor_pending_requests' %}"" class="menu-item
+        <a href="{% url 'supervisor_pending_requests' %}" class="menu-item
         {% if request.resolver_match.url_name == 'supervisor_pending_requests' %}active{% endif %}">
             <span class="menu-icon">👀</span>
             <span class="menu-text">Supervisor Reviews</span>

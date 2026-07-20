@@ -3,6 +3,8 @@ from . import views
 
 urlpatterns = [
     path('leave-types/', views.manage_leave_types, name='manage_leave_types'),
+    path('public-holidays/', views.manage_public_holidays, name='manage_public_holidays'),
+    path('public-holidays/delete/<int:holiday_id>/', views.delete_public_holiday, name='delete_public_holiday'),
     path('balances/', views.manage_balances, name='manage_balances'),
     path('apply/', views.apply_leave, name='apply_leave'),
     path('my-applications/', views.my_applications, name='my_applications'),

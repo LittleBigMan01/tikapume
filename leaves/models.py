@@ -51,6 +51,17 @@ class LeaveBalance(models.Model):
         return f"{self.user.get_full_name()} - {self.leave_type.name} ({self.remaining_days} days left)"
 
 
+class PublicHoliday(models.Model):
+    name = models.CharField(max_length=100)
+    date = models.DateField(unique=True)
+
+    class Meta:
+        ordering = ['date']
+
+    def __str__(self):
+        return f"{self.name} ({self.date})"
+
+
 class LeaveApplication(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending Supervisor Review'),
@@ -83,6 +94,8 @@ class LeaveApplication(models.Model):
     end_date = models.DateField()
     total_days = models.IntegerField()
     reason = models.TextField()
+    is_special_request = models.BooleanField(default=False)
+    special_request_reason = models.TextField(blank=True)
     status = models.CharField(
         max_length=30, choices=STATUS_CHOICES, default='pending'
     )

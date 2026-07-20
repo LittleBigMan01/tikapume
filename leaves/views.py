@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import LeaveType, LeaveGradeDays, LeaveBalance, LeaveApplication
+from .models import LeaveType, LeaveGradeDays, LeaveBalance, LeaveApplication, PublicHoliday
+from .utils import calculate_working_days
 from accounts.models import CustomUser, Grade
 from django.db import models
 from django.db.models import Q
@@ -62,6 +63,41 @@ def manage_leave_types(request):
         'grade_days': grade_days,
         'grades': grades,
     })
+
+
+@login_required
+def manage_public_holidays(request):
+    active_role = request.session.get('active_role', request.user.role)
+    if active_role != 'it_admin':
+        return redirect('dashboard')
+
+    holidays = PublicHoliday.objects.all()
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        date = request.POST.get('date')
+        if name and date:
+            if PublicHoliday.objects.filter(date=date).exists():
+                messages.error(request, f'A public holiday is already set for {date}.')
+            else:
+                PublicHoliday.objects.create(name=name.strip(), date=date)
+                messages.success(request, f'Public holiday "{name}" added successfully!')
+                return redirect('manage_public_holidays')
+
+    return render(request, 'leaves/manage_public_holidays.html', {
+        'holidays': holidays,
+    })
+
+
+@login_required
+def delete_public_holiday(request, holiday_id):
+    active_role = request.session.get('active_role', request.user.role)
+    if active_role != 'it_admin':
+        return redirect('dashboard')
+    holiday = get_object_or_404(PublicHoliday, id=holiday_id)
+    holiday.delete()
+    messages.success(request, 'Public holiday removed successfully!')
+    return redirect('manage_public_holidays')
 
 
 @login_required
@@ -135,14 +171,38 @@ def apply_leave(request):
         end_date = request.POST.get('end_date')
         reason = request.POST.get('reason')
         chosen_supervisor_id = request.POST.get('chosen_supervisor')
+        is_special_request = bool(request.POST.get('is_special_request'))
+        special_request_reason = request.POST.get('special_request_reason', '').strip()
 
         leave_type = get_object_or_404(LeaveType, id=leave_type_id)
         start = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
         end = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
-        total_days = (end - start).days + 1
 
         if end < start:
             messages.error(request, 'End date cannot be before start date.')
+            return redirect('apply_leave')
+
+        # 7-day advance notice rule, unless this is a special request
+        days_until_start = (start - datetime.date.today()).days
+        if not is_special_request and days_until_start < 7:
+            messages.error(
+                request,
+                'Leave must be applied for at least 7 days in advance. '
+                'If this is urgent, tick "Special Request" and provide a reason.'
+            )
+            return redirect('apply_leave')
+
+        if is_special_request and not special_request_reason:
+            messages.error(request, 'Please provide a reason for the special request.')
+            return redirect('apply_leave')
+
+        total_days = calculate_working_days(start, end)
+        if total_days == 0:
+            messages.error(
+                request,
+                'The selected date range contains no working days '
+                '(all weekends/public holidays).'
+            )
             return redirect('apply_leave')
 
         try:
@@ -152,7 +212,7 @@ def apply_leave(request):
                 year=current_year
             )
             if balance.remaining_days < total_days:
-                messages.error(request, f'Insufficient leave balance! You have {balance.remaining_days} days remaining but requested {total_days} days.')
+                messages.error(request, f'Insufficient leave balance! You have {balance.remaining_days} days remaining but requested {total_days} working days.')
                 return redirect('apply_leave')
         except LeaveBalance.DoesNotExist:
             messages.error(request, 'You have no leave balance assigned for this leave type. Contact IT Administrator.')
@@ -169,6 +229,8 @@ def apply_leave(request):
             end_date=end,
             total_days=total_days,
             reason=reason,
+            is_special_request=is_special_request,
+            special_request_reason=special_request_reason,
             status='pending',
             chosen_supervisor=chosen_supervisor,
         )
