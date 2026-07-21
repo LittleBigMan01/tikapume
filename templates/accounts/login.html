@@ -173,6 +173,71 @@
             font-size: 12px;
             margin-top: 24px;
         }
+
+        /* Mobile layout */
+        @media (max-width: 700px) {
+            body {
+                align-items: flex-start;
+                padding: 0;
+            }
+
+            .login-wrapper {
+                flex-direction: column;
+                width: 100%;
+                min-height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .left-panel {
+                width: 100%;
+                padding: 32px 20px 24px;
+                flex-direction: column;
+            }
+
+            .logo-circle {
+                width: 70px;
+                height: 70px;
+                margin-bottom: 14px;
+            }
+
+            .logo-circle img {
+                width: 60px !important;
+                height: 60px !important;
+            }
+
+            .left-panel h1 {
+                font-size: 20px;
+            }
+
+            .left-panel p {
+                font-size: 12px;
+            }
+
+            .left-panel .tagline {
+                margin-top: 10px;
+            }
+
+            .right-panel {
+                width: 100%;
+                padding: 30px 22px 40px;
+            }
+
+            .right-panel h2 {
+                font-size: 21px;
+            }
+
+            input[type="text"],
+            input[type="password"],
+            select {
+                font-size: 16px;
+                padding: 12px 14px;
+            }
+
+            .form-group input[type="password"] {
+                padding-right: 42px;
+            }
+        }
     </style>
 </head>
 <body>
