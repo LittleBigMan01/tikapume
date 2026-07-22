@@ -114,9 +114,9 @@ def create_user(request):
     if active_role != 'it_admin':
         return redirect('dashboard')
 
-    departments = Department.objects.all()
+    departments = Department.objects.all().order_by('name')
     grades = Grade.objects.all()
-    job_titles = JobTitle.objects.all()
+    job_titles = JobTitle.objects.all().order_by('name')
 
     if request.method == 'POST':
         username = request.POST.get('username')
