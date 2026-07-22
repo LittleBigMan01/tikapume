@@ -104,7 +104,7 @@ def manage_users(request):
     active_role = request.session.get('active_role', request.user.role)
     if active_role != 'it_admin':
         return redirect('dashboard')
-    users = CustomUser.objects.all().exclude(id=request.user.id)
+    users = CustomUser.objects.all().exclude(id=request.user.id).order_by('first_name', 'last_name')
     return render(request, 'accounts/manage_users.html', {'users': users})
 
 
