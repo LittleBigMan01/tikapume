@@ -129,6 +129,17 @@
         }
 
         .topbar-logout-btn:hover { background: rgba(0,0,0,0.3); }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: rgba(0,0,0,0.15);
+            border: none;
+            color: white;
+            font-size: 20px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
 
         .content-area { padding: 30px; }
 
@@ -347,6 +358,8 @@
             div[style*="grid-template-columns"] > * {
                 margin-bottom: 16px;
             }
+
+            .mobile-menu-btn { display: inline-block; }
         }
     </style>
     <style>
@@ -369,14 +382,16 @@
 
     <div class="main-content" id="mainContent">
         <div class="topbar">
-            <h1>⚖️ TikaPume — Leave Management System</h1>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+            </div>
             <div style="display:flex; align-items:center; gap:16px;">
                 <span class="user-info">
                     👤 {{ request.user.get_full_name }}
                     ({{ request.user.get_role_display }})
                 </span>
-                <a href="{% url 'logout' %}" class="topbar-logout-btn"
-                onclick="return confirm('Are you sure you want to log out?')">
+                <a href=""{% url 'logout' %}" class="topbar-logout-btn"
+                onclick="return confirm('Are you sure you want to logout?');">
                     🚪 Logout
                 </a>
             </div>
