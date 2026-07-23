@@ -12,6 +12,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.conf import settings
+import requests
 
 
 def generate_temp_password(length=8):
@@ -35,19 +36,28 @@ def send_verification_email(request, user):
     token = default_token_generator.make_token(user)
     verify_url = request.build_absolute_uri(f'/verify/{uid}/{token}/')
 
-    send_mail(
-        subject='Verify your Legal Aid Bureau account',
-        message=(
-            f'Hi {user.first_name},\n\n'
-            f'An account has been created for you on TikaPume — Leave Management System.\n'
-            f'Please click the link below to verify your email and activate your account:\n\n'
-            f'{verify_url}\n\n'
-            f'If you did not expect this, you can ignore this email.'
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[user.email],
-        fail_silently=False,
+    response = requests.post(
+        'https://api.brevo.com/v3/smtp/email',
+        headers={
+            'api-key': settings.BREVO_API_KEY,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        json={
+            'sender': {'email': settings.BREVO_SENDER_EMAIL, 'name': 'Legal Aid Bureau'},
+            'to': [{'email': user.email, 'name': user.get_full_name()}],
+            'subject': 'Verify your Legal Aid Bureau account',
+            'htmlContent': (
+                f'<p>Hi {user.first_name},</p>'
+                f'<p>An account has been created for you on TikaPume — Leave Management System.</p>'
+                f'<p>Please click the link below to verify your email and activate your account:</p>'
+                f'<p><a href="{verify_url}">{verify_url}</a></p>'
+                f'<p>If you did not expect this, you can ignore this email.</p>'
+            ),
+        },
+        timeout=10,
     )
+    response.raise_for_status()
 
 def verify_email(request, uidb64, token):
     try:

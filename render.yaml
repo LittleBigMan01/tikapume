@@ -26,3 +26,7 @@ services:
         value: your_email@outlook.com
       - key: EMAIL_HOST_PASSWORD
         sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_SENDER_EMAIL
+        value: mphakamkuza@gmail.com
