@@ -5,82 +5,53 @@
 {% block content %}
 <div class="page-header">
     <h2>💼 Manage Job Titles</h2>
+    <a href="{% url 'create_job_title' %}" class="btn-gold">+ Create Job Title</a>
 </div>
 
-<div style="display:grid; grid-template-columns:1fr 2fr; gap:25px;">
-    <!-- Create Job Title Form -->
-    <div class="form-card">
-        <h2>💼 Add Job Title</h2>
-        <form method="POST">
-            {% csrf_token %}
-            <div class="form-group">
-                <label>Job Title</label>
-                <input type="text" name="name"
-                placeholder="e.g. Legal Aid Officer" required>
-            </div>
-            <div class="form-group">
-                <label>Department</label>
-                <select name="department">
-                    <option value="">-- Select Department --</option>
-                    {% for dept in departments %}
-                        <option value="{{ dept.id }}">{{ dept.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <button type="submit" class="btn-gold"
-            style="width:100%; padding:11px;">
-                + Add Job Title
-            </button>
-        </form>
-    </div>
-
-    <!-- Job Titles Table -->
-    <div class="table-wrapper">
-        <h2>💼 All Job Titles</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Job Title</th>
-                    <th>Department</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for jt in job_titles %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td><strong>{{ jt.name }}</strong></td>
-                    <td>{{ jt.department.name|default:"—" }}</td>
-                    <td>{{ jt.created_at|date:"d M Y" }}</td>
-                    <td>
-    <div style="display:flex; gap:6px;">
-        <a href="{% url 'edit_job_title' jt.id %}"
-        class="btn-gold"
-        style="padding:5px 12px; font-size:12px;">
-            ✏️ Edit
-        </a>
-        <a href="{% url 'delete_job_title' jt.id %}"
-        style="padding:5px 12px; font-size:12px;
-        background:#dc3545; color:white; border-radius:8px;
-        text-decoration:none;"
-        onclick="return confirm('Are you sure you want to delete this job title?')">
-            🗑️ Delete
-        </a>
-    </div>
-</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" style="text-align:center;
-                    color:#888; padding:30px;">
-                        No job titles yet. Add the first one!
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Job Title</th>
+                <th>Department</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job_title in job_titles %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ job_title.name }}</td>
+                <td>{{ job_title.department.name|default:"—" }}</td>
+                <td>{{ job_title.created_at|date:"d M Y" }}</td>
+                <td>
+                    <div style="display:flex; gap:6px;">
+                        <a href="{% url 'edit_job_title' job_title.id %}"
+                        class="btn-gold"
+                        style="padding:5px 12px; font-size:12px;">
+                            ✏️ Edit
+                        </a>
+                        <a href="{% url 'delete_job_title' job_title.id %}"
+                        style="padding:5px 12px; font-size:12px;
+                        background:#dc3545; color:white; border-radius:8px;
+                        text-decoration:none;"
+                        onclick="return confirm('Are you sure you want to delete this job title?')">
+                            🗑️ Delete
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align:center;
+                color:#888; padding:30px;">
+                    No job titles yet. Create the first one!
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

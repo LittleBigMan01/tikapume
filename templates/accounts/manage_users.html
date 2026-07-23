@@ -57,7 +57,7 @@
                 <td>{{ user.department.name|default:"—" }}</td>
                 <td>{{ user.grade.name|default:"—" }}</td>
                 <td>
-                    <div style="display:flex; gap:6px;">
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
                         <a href="{% url 'edit_user' user.id %}"
                         class="btn-gold"
                         style="padding:5px 12px; font-size:12px;">
@@ -68,6 +68,13 @@
                         background:#2c2c2c; color:white; border-radius:8px;
                         text-decoration:none;">
                             🔑 Password
+                        </a>
+                        <a href="{% url 'delete_user' user.id %}"
+                        onclick="return confirm('Delete {{ user.get_full_name }}? This cannot be undone.')"
+                        style="padding:5px 12px; font-size:12px;
+                        background:#dc3545; color:white; border-radius:8px;
+                        text-decoration:none;">
+                            🗑️ Delete
                         </a>
                     </div>
                 </td>

@@ -1,0 +1,30 @@
+{% extends 'includes/base_admin.html' %}
+
+{% block title %}Create Leave Type - TikaPume{% endblock %}
+
+{% block content %}
+<a href="{% url 'manage_leave_types' %}" class="back-link">← Back to Leave Types</a>
+
+<div class="page-header">
+    <h2>📋 Create Leave Type</h2>
+</div>
+
+<div class="form-card" style="max-width:500px;">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Leave Type Name</label>
+            <input type="text" name="name"
+            placeholder="e.g. Annual Leave" required>
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <textarea name="description"
+            placeholder="Optional description"></textarea>
+        </div>
+        <button type="submit" class="btn-gold" style="width:100%; padding:11px;">
+            + Add Leave Type
+        </button>
+    </form>
+</div>
+{% endblock %}

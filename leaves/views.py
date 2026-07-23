@@ -15,55 +15,68 @@ def manage_leave_types(request):
     if active_role != 'it_admin':
         return redirect('dashboard')
 
-    leave_types = LeaveType.objects.all()
-    grade_days = LeaveGradeDays.objects.all().order_by('leave_type', 'grade')
-    grades = Grade.objects.all()
-
-    if request.method == 'POST':
-        action = request.POST.get('action')
-
-        if action == 'add_leave_type':
-            name = request.POST.get('name')
-            description = request.POST.get('description')
-            if name:
-                if LeaveType.objects.filter(name__iexact=name.strip()).exists():
-                    messages.error(request, f'A leave type named "{name}" already exists.')
-                else:
-                    LeaveType.objects.create(
-                        name=name.strip(),
-                        description=description,
-                    )
-                    messages.success(request, f'Leave type "{name}" created successfully!')
-                    return redirect('manage_leave_types')
-
-        elif action == 'set_grade_days':
-            leave_type_id = request.POST.get('leave_type')
-            grade_id = request.POST.get('grade')
-            days = request.POST.get('days')
-
-            leave_type = get_object_or_404(LeaveType, id=leave_type_id)
-            grade = get_object_or_404(Grade, id=grade_id)
-
-            gd, created = LeaveGradeDays.objects.get_or_create(
-                leave_type=leave_type,
-                grade=grade,
-                defaults={'days': days}
-            )
-            if not created:
-                gd.days = days
-                gd.save()
-                messages.success(request, f'Days updated for {grade.name} — {leave_type.name}!')
-            else:
-                messages.success(request, f'Days set for {grade.name} — {leave_type.name}!')
-
-            return redirect('manage_leave_types')
+    leave_types = LeaveType.objects.order_by('name')
+    grade_days = LeaveGradeDays.objects.all().order_by('leave_type__name', 'grade__name')
 
     return render(request, 'leaves/manage_leave_types.html', {
         'leave_types': leave_types,
         'grade_days': grade_days,
+    })
+@login_required
+def create_leave_type(request):
+    active_role = request.session.get('active_role', request.user.role)
+    if active_role != 'it_admin':
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        if name:
+            if LeaveType.objects.filter(name__iexact=name).exists():
+                messages.error(request, f'Leave type "{name}" already exists.')
+            else:
+                LeaveType.objects.create(name=name, description=description)
+                messages.success(request, f'Leave type "{name}" created successfully!')
+                return redirect('manage_leave_types')
+
+    return render(request, 'leaves/create_leave_type.html')
+
+
+@login_required
+def create_grade_days(request):
+    active_role = request.session.get('active_role', request.user.role)
+    if active_role != 'it_admin':
+        return redirect('dashboard')
+
+    leave_types = LeaveType.objects.order_by('name')
+    grades = Grade.objects.order_by('name')
+
+    if request.method == 'POST':
+        leave_type_id = request.POST.get('leave_type')
+        grade_id = request.POST.get('grade')
+        days = request.POST.get('days')
+
+        leave_type = get_object_or_404(LeaveType, id=leave_type_id)
+        grade = get_object_or_404(Grade, id=grade_id)
+
+        gd, created = LeaveGradeDays.objects.get_or_create(
+            leave_type=leave_type,
+            grade=grade,
+            defaults={'days': days}
+        )
+        if not created:
+            gd.days = days
+            gd.save()
+            messages.success(request, f'Days updated for {grade.name} — {leave_type.name}!')
+        else:
+            messages.success(request, f'Days set for {grade.name} — {leave_type.name}!')
+
+        return redirect('manage_leave_types')
+
+    return render(request, 'leaves/create_grade_days.html', {
+        'leave_types': leave_types,
         'grades': grades,
     })
-
 
 @login_required
 def manage_public_holidays(request):
@@ -106,12 +119,22 @@ def manage_balances(request):
     if active_role != 'it_admin':
         return redirect('dashboard')
 
+    balances = LeaveBalance.objects.all().order_by('user__last_name', 'leave_type__name', 'year')
+
+    return render(request, 'leaves/manage_balances.html', {
+        'balances': balances,
+    })
+@login_required
+def create_leave_balance(request):
+    active_role = request.session.get('active_role', request.user.role)
+    if active_role != 'it_admin':
+        return redirect('dashboard')
+
     employees = CustomUser.objects.filter(
         Q(role='employee') | Q(secondary_role='employee') |
-        Q(role='hr') | Q(role='approver') | Q(role='it_admin')
-    ).order_by('first_name')
-    leave_types = LeaveType.objects.all()
-    balances = LeaveBalance.objects.all().order_by('user', 'leave_type')
+        Q(role='hr') | Q(role='approver')
+    ).exclude(role='it_admin').order_by('last_name', 'first_name')
+    leave_types = LeaveType.objects.order_by('name')
 
     if request.method == 'POST':
         user_id = request.POST.get('user')
@@ -122,29 +145,31 @@ def manage_balances(request):
         user = get_object_or_404(CustomUser, id=user_id)
         leave_type = get_object_or_404(LeaveType, id=leave_type_id)
 
-        balance, created = LeaveBalance.objects.get_or_create(
-            user=user,
-            leave_type=leave_type,
-            year=year,
-            defaults={'total_days': total_days}
-        )
+        existing_balances = LeaveBalance.objects.filter(
+            user=user, leave_type=leave_type, year=year
+        ).order_by('id')
 
-        if not created:
+        if existing_balances.exists():
+            balance = existing_balances.first()
+            if existing_balances.count() > 1:
+                for duplicate_balance in existing_balances[1:]:
+                    duplicate_balance.delete()
             balance.total_days = total_days
             balance.save()
             messages.success(request, f'Balance updated for {user.get_full_name()}!')
         else:
+            LeaveBalance.objects.create(
+                user=user, leave_type=leave_type, year=year, total_days=total_days
+            )
             messages.success(request, f'Balance assigned to {user.get_full_name()} successfully!')
 
         return redirect('manage_balances')
 
-    return render(request, 'leaves/manage_balances.html', {
+    return render(request, 'leaves/create_leave_balance.html', {
         'employees': employees,
         'leave_types': leave_types,
-        'balances': balances,
         'current_year': datetime.date.today().year,
     })
-
 
 @login_required
 def apply_leave(request):

@@ -15,4 +15,7 @@ urlpatterns = [
     path('supervisor/action/<int:application_id>/', views.supervisor_action, name='supervisor_action'),
     path('approver/pending/', views.approver_pending_requests, name='approver_pending_requests'),
     path('approver/action/<int:application_id>/', views.approve_decline_leave, name='approve_decline_leave'),
+    path('leave-types/create/', views.create_leave_type, name='create_leave_type'),
+    path('leave-types/grade-days/create/', views.create_grade_days, name='create_grade_days'),
+    path('balances/create/', views.create_leave_balance, name='create_leave_balance'),
 ]

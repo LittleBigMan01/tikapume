@@ -4,144 +4,79 @@
 
 {% block content %}
 <div class="page-header">
-    <h2>📋 Leave Types & Grade Days</h2>
+    <h2>📋 Leave Types</h2>
+    <a href="{% url 'create_leave_type' %}" class="btn-gold">+ Create Leave Type</a>
 </div>
 
-<div style="display:grid; grid-template-columns:1fr 2fr; gap:25px;
-margin-bottom:30px;">
-    <!-- Create Leave Type Form -->
-    <div class="form-card">
-        <h2>📋 Add Leave Type</h2>
-        <form method="POST">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="add_leave_type">
-            <div class="form-group">
-                <label>Leave Type Name</label>
-                <input type="text" name="name"
-                placeholder="e.g. Annual Leave" required>
-            </div>
-            <div class="form-group">
-                <label>Description</label>
-                <textarea name="description"
-                placeholder="Optional description"></textarea>
-            </div>
-            <button type="submit" class="btn-gold"
-            style="width:100%; padding:11px;">
-                + Add Leave Type
-            </button>
-        </form>
-    </div>
-
-    <!-- Leave Types Table -->
-    <div class="table-wrapper">
-        <h2>📋 All Leave Types</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Leave Type</th>
-                    <th>Description</th>
-                    <th>Created</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for lt in leave_types %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td><strong>{{ lt.name }}</strong></td>
-                    <td>{{ lt.description|default:"—" }}</td>
-                    <td>{{ lt.created_at|date:"d M Y" }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" style="text-align:center;
-                    color:#888; padding:30px;">
-                        No leave types yet. Add the first one!
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div class="table-wrapper" style="margin-bottom:30px;">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Leave Type</th>
+                <th>Description</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lt in leave_types %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td><strong>{{ lt.name }}</strong></td>
+                <td>{{ lt.description|default:"—" }}</td>
+                <td>{{ lt.created_at|date:"d M Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align:center;
+                color:#888; padding:30px;">
+                    No leave types yet. Create the first one!
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
-<!-- Assign Days Per Grade Per Leave Type -->
-<div style="display:grid; grid-template-columns:1fr 2fr; gap:25px;">
-    <div class="form-card">
-        <h2>📊 Set Grade Days</h2>
-        <p style="color:#888; font-size:13px; margin-bottom:20px;">
-            Set how many days each grade gets for a specific leave type.
-        </p>
-        <form method="POST">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="set_grade_days">
-            <div class="form-group">
-                <label>Leave Type</label>
-                <select name="leave_type" required>
-                    <option value="">-- Select Leave Type --</option>
-                    {% for lt in leave_types %}
-                        <option value="{{ lt.id }}">{{ lt.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Grade</label>
-                <select name="grade" required>
-                    <option value="">-- Select Grade --</option>
-                    {% for grade in grades %}
-                        <option value="{{ grade.id }}">{{ grade.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Number of Days</label>
-                <input type="number" name="days"
-                placeholder="e.g. 21" min="0" required>
-            </div>
-            <button type="submit" class="btn-gold"
-            style="width:100%; padding:11px;">
-                ✅ Set Days
-            </button>
-        </form>
-    </div>
+<div class="page-header">
+    <h2>📊 Grade Days per Leave Type</h2>
+    <a href="{% url 'create_grade_days' %}" class="btn-gold">+ Set Grade Days</a>
+</div>
 
-    <!-- Grade Days Table -->
-    <div class="table-wrapper">
-        <h2>📊 Grade Days per Leave Type</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Leave Type</th>
-                    <th>Grade</th>
-                    <th>Days</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for gd in grade_days %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ gd.leave_type.name }}</td>
-                    <td>{{ gd.grade.name }}</td>
-                    <td>
-                        <span style="background:#fffbea;
-                        border:1px solid #DAA520; color:#B8960C;
-                        padding:3px 10px; border-radius:20px;
-                        font-size:12px; font-weight:600;">
-                            {{ gd.days }} days
-                        </span>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" style="text-align:center;
-                    color:#888; padding:30px;">
-                        No grade days set yet.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Leave Type</th>
+                <th>Grade</th>
+                <th>Days</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for gd in grade_days %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ gd.leave_type.name }}</td>
+                <td>{{ gd.grade.name }}</td>
+                <td>
+                    <span style="background:#fffbea;
+                    border:1px solid #DAA520; color:#B8960C;
+                    padding:3px 10px; border-radius:20px;
+                    font-size:12px; font-weight:600;">
+                        {{ gd.days }} days
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align:center;
+                color:#888; padding:30px;">
+                    No grade days set yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

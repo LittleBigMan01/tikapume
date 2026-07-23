@@ -301,6 +301,21 @@ def reset_password(request, user_id):
         'target_user': target_user,
     })
 
+@login_required
+def delete_user(request, user_id):
+    active_role = request.session.get('active_role', request.user.role)
+    if active_role != 'it_admin':
+        return redirect('dashboard')
+
+    if user_id == request.user.id:
+        messages.error(request, 'You cannot delete your own account.')
+        return redirect('manage_users')
+
+    target_user = get_object_or_404(CustomUser, id=user_id)
+    full_name = target_user.get_full_name()
+    target_user.delete()
+    messages.success(request, f'User {full_name} deleted successfully!')
+    return redirect('manage_users')
 
 @login_required
 def manage_departments(request):
@@ -308,7 +323,17 @@ def manage_departments(request):
     if active_role != 'it_admin':
         return redirect('dashboard')
 
-    departments = Department.objects.all()
+    departments = Department.objects.all().order_by('name')
+
+    return render(request, 'accounts/manage_departments.html', {
+        'departments': departments,
+    })
+
+@login_required
+def create_department(request):
+    active_role = request.session.get('active_role', request.user.role)
+    if active_role != 'it_admin':
+        return redirect('dashboard')
 
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -321,10 +346,7 @@ def manage_departments(request):
                 messages.success(request, f'Department "{name}" created successfully!')
                 return redirect('manage_departments')
 
-    return render(request, 'accounts/manage_departments.html', {
-        'departments': departments,
-    })
-
+    return render(request, 'accounts/create_department.html')
 
 @login_required
 def edit_department(request, dept_id):
@@ -362,14 +384,23 @@ def delete_department(request, dept_id):
     messages.success(request, 'Department deleted successfully!')
     return redirect('manage_departments')
 
-
 @login_required
 def manage_grades(request):
     active_role = request.session.get('active_role', request.user.role)
     if active_role != 'it_admin':
         return redirect('dashboard')
 
-    grades = Grade.objects.all()
+    grades = Grade.objects.all().order_by('name')
+
+    return render(request, 'accounts/manage_grades.html', {
+        'grades': grades,
+    })
+
+@login_required
+def create_grade(request):
+    active_role = request.session.get('active_role', request.user.role)
+    if active_role != 'it_admin':
+        return redirect('dashboard')
 
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -382,10 +413,7 @@ def manage_grades(request):
                 messages.success(request, f'Grade "{name}" created successfully!')
                 return redirect('manage_grades')
 
-    return render(request, 'accounts/manage_grades.html', {
-        'grades': grades,
-    })
-
+    return render(request, 'accounts/create_grade.html')
 
 @login_required
 def edit_grade(request, grade_id):
@@ -430,8 +458,19 @@ def manage_job_titles(request):
     if active_role != 'it_admin':
         return redirect('dashboard')
 
-    job_titles = JobTitle.objects.all()
-    departments = Department.objects.all()
+    job_titles = JobTitle.objects.all().order_by('name')
+
+    return render(request, 'accounts/manage_job_titles.html', {
+        'job_titles': job_titles,
+    })
+
+@login_required
+def create_job_title(request):
+    active_role = request.session.get('active_role', request.user.role)
+    if active_role != 'it_admin':
+        return redirect('dashboard')
+
+    departments = Department.objects.all().order_by('name')
 
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -447,8 +486,7 @@ def manage_job_titles(request):
                 messages.success(request, f'Job Title "{name}" created successfully!')
                 return redirect('manage_job_titles')
 
-    return render(request, 'accounts/manage_job_titles.html', {
-        'job_titles': job_titles,
+    return render(request, 'accounts/create_job_title.html', {
         'departments': departments,
     })
 

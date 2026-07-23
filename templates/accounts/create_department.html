@@ -1,0 +1,30 @@
+{% extends 'includes/base_admin.html' %}
+
+{% block title %}Create Department - TikaPume{% endblock %}
+
+{% block content %}
+<a href="{% url 'manage_departments' %}" class="back-link">← Back to Departments</a>
+
+<div class="page-header">
+    <h2>🏢 Create Department</h2>
+</div>
+
+<div class="form-card" style="max-width:500px;">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Department Name</label>
+            <input type="text" name="name"
+            placeholder="Enter department name" required>
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <textarea name="description"
+            placeholder="Optional description"></textarea>
+        </div>
+        <button type="submit" class="btn-gold" style="width:100%; padding:11px;">
+            + Add Department
+        </button>
+    </form>
+</div>
+{% endblock %}

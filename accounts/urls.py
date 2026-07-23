@@ -20,4 +20,8 @@ urlpatterns = [
     path('job-titles/delete/<int:job_title_id>/', views.delete_job_title, name='delete_job_title'),
     path('profile/', views.user_profile, name='user_profile'),
     path('verify/<str:uidb64>/<str:token>/', views.verify_email, name='verify_email'),
+    path('users/delete/<int:user_id>/', views.delete_user, name='delete_user'),
+    path('departments/create/', views.create_department, name='create_department'),
+    path('grades/create/', views.create_grade, name='create_grade'),
+    path('job-titles/create/', views.create_job_title, name='create_job_title'),
 ]

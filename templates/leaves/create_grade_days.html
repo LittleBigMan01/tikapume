@@ -1,0 +1,46 @@
+{% extends 'includes/base_admin.html' %}
+
+{% block title %}Set Grade Days - TikaPume{% endblock %}
+
+{% block content %}
+<a href="{% url 'manage_leave_types' %}" class="back-link">← Back to Leave Types</a>
+
+<div class="page-header">
+    <h2>📊 Set Grade Days</h2>
+</div>
+
+<div class="form-card" style="max-width:500px;">
+    <p style="color:#888; font-size:13px; margin-bottom:20px;">
+        Set how many days each grade gets for a specific leave type.
+    </p>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Leave Type</label>
+            <select name="leave_type" required>
+                <option value="">-- Select Leave Type --</option>
+                {% for lt in leave_types %}
+                    <option value="{{ lt.id }}">{{ lt.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Grade</label>
+            <select name="grade" required>
+                <option value="">-- Select Grade --</option>
+                {% for grade in grades %}
+                    <option value="{{ grade.id }}">{{ grade.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Number of Days</label>
+            <input type="number" name="days"
+            placeholder="e.g. 21" min="0" required>
+        </div>
+        <button type="submit" class="btn-gold" style="width:100%; padding:11px;">
+            ✅ Set Days
+        </button>
+    </form>
+</div>
+{% endblock %}
