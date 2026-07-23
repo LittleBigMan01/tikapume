@@ -19,4 +19,5 @@ urlpatterns = [
     path('grades/delete/<int:grade_id>/', views.delete_grade, name='delete_grade'),
     path('job-titles/delete/<int:job_title_id>/', views.delete_job_title, name='delete_job_title'),
     path('profile/', views.user_profile, name='user_profile'),
+    path('verify/<str:uidb64>/<str:token>/', views.verify_email, name='verify_email'),
 ]

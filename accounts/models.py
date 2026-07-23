@@ -63,6 +63,7 @@ class CustomUser(AbstractUser):
     temp_password = models.CharField(max_length=100, blank=True)
     is_supervisor = models.BooleanField(default=False)
     is_first_login = models.BooleanField(default=True)
+    email_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

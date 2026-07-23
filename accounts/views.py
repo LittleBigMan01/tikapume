@@ -6,12 +6,65 @@ from .models import CustomUser, Department, Grade, JobTitle
 from leaves.models import LeaveApplication, LeaveBalance
 import random
 import string
+import re
+from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.conf import settings
 
 
 def generate_temp_password(length=8):
     characters = string.ascii_letters + string.digits
     return ''.join(random.choices(characters, k=length))
 
+def validate_password_strength(password):
+    if len(password) < 8:
+        return False, 'Password must be at least 8 characters long.'
+    if not re.search(r'[A-Z]', password):
+        return False, 'Password must contain at least one uppercase letter.'
+    if not re.search(r'[a-z]', password):
+        return False, 'Password must contain at least one lowercase letter.'
+    if not re.search(r'[0-9]', password):
+        return False, 'Password must contain at least one number.'
+    return True, ''
+
+
+def send_verification_email(request, user):
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    verify_url = request.build_absolute_uri(f'/verify/{uid}/{token}/')
+
+    send_mail(
+        subject='Verify your Legal Aid Bureau account',
+        message=(
+            f'Hi {user.first_name},\n\n'
+            f'An account has been created for you on TikaPume — Leave Management System.\n'
+            f'Please click the link below to verify your email and activate your account:\n\n'
+            f'{verify_url}\n\n'
+            f'If you did not expect this, you can ignore this email.'
+        ),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
+
+def verify_email(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = CustomUser.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.email_verified = True
+        user.save()
+        messages.success(request, 'Email verified! You can now log in.')
+    else:
+        messages.error(request, 'This verification link is invalid or has expired.')
+
+    return redirect('login')
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -107,7 +160,6 @@ def manage_users(request):
     users = CustomUser.objects.all().exclude(id=request.user.id).order_by('first_name', 'last_name')
     return render(request, 'accounts/manage_users.html', {'users': users})
 
-
 @login_required
 def create_user(request):
     active_role = request.session.get('active_role', request.user.role)
@@ -115,7 +167,7 @@ def create_user(request):
         return redirect('dashboard')
 
     departments = Department.objects.all().order_by('name')
-    grades = Grade.objects.all()
+    grades = Grade.objects.all().order_by('name')
     job_titles = JobTitle.objects.all().order_by('name')
 
     if request.method == 'POST':
@@ -131,8 +183,14 @@ def create_user(request):
         department_id = request.POST.get('department')
         phone = request.POST.get('phone')
 
+        is_valid, error_message = validate_password_strength(password)
+
         if CustomUser.objects.filter(username=username).exists():
             messages.error(request, 'Username already exists.')
+        elif CustomUser.objects.filter(email__iexact=email).exists():
+            messages.error(request, 'A user with this email already exists.')
+        elif not is_valid:
+            messages.error(request, error_message)
         else:
             user = CustomUser.objects.create_user(
                 username=username,
@@ -143,6 +201,8 @@ def create_user(request):
                 role=role,
                 phone=phone,
                 temp_password=password,
+                is_active=False,
+                email_verified=False,
             )
             if secondary_role:
                 user.secondary_role = secondary_role
@@ -154,7 +214,23 @@ def create_user(request):
                 user.job_title = JobTitle.objects.get(id=job_title_id)
             user.is_supervisor = True if request.POST.get('is_supervisor') else False
             user.save()
-            messages.success(request, f'Account for {first_name} {last_name} created successfully!')
+
+            try:
+                send_verification_email(request, user)
+                messages.success(
+                    request,
+                    f'Account for {first_name} {last_name} created! '
+                    f'A verification email has been sent to {email} — '
+                    f'the account will be active once they verify.'
+                )
+            except Exception:
+                messages.warning(
+                    request,
+                    f'Account for {first_name} {last_name} created, but the '
+                    f'verification email failed to send. Check the email address '
+                    f'and use "Resend verification" from Manage Users.'
+                )
+
             return redirect('manage_users')
 
     return render(request, 'accounts/create_user.html', {
