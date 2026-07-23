@@ -233,7 +233,8 @@ def create_user(request):
                     f'A verification email has been sent to {email} — '
                     f'the account will be active once they verify.'
                 )
-            except Exception:
+            except Exception as e:
+                print(f'VERIFICATION EMAIL ERROR: {e}')
                 messages.warning(
                     request,
                     f'Account for {first_name} {last_name} created, but the '
